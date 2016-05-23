@@ -1,0 +1,182 @@
+
+
+
+
+\documentclass[conference]{IEEEtran}
+
+\usepackage{mathtools}
+
+\usepackage{float}
+\usepackage[colorlinks,linkcolor=red,anchorcolor=red,citecolor=red]{hyperref}
+\usepackage[pdftex]{graphicx}
+\graphicspath{{./graphics/}}
+\usepackage{subfigure}
+\usepackage{multicol}
+\usepackage{paralist}
+\usepackage{bm}
+\usepackage{amsfonts}
+\usepackage{url}
+\usepackage{multirow}
+
+\usepackage{color}
+
+\makeatletter
+\newif\if@restonecol
+\makeatother
+\let\algorithm\relax
+\let\endalgorithm\relax
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}%[ruled,vlined]{
+\usepackage{algpseudocode}
+\usepackage{amsmath}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}  % Use Input in the format of Algorithm
+\renewcommand{\algorithmicensure}{\textbf{Output:}} % Use Output in the format of Algorithm
+
+
+\begin{document}
+
+\title{A \LaTeX\, Demo for IEEE}
+
+
+\author{\IEEEauthorblockN{Jinliang Xu}
+\IEEEauthorblockA{State Key Laboratory of Networking and Switching Technology\\
+Beijing University of Posts and Telecommunications, Beijing, China\\
+site: http:www.jinliangxu.com}
+}
+
+
+
+
+
+
+% make the title area
+\maketitle
+
+% As a general rule, do not put math, special symbols or citations
+% in the abstract
+\begin{abstract}
+The Institute of Electrical and Electronics Engineers (IEEE, pronounced "I triple E") is a professional association with its corporate office in New York City and its operations center in Piscataway, New Jersey. It was formed in 1963 from the amalgamation of the American Institute of Electrical Engineers and the Institute of Radio Engineers. Today, it is the world's largest association of technical professionals with more than 400,000 members in chapters around the world. Its objectives are the educational and technical advancement of electrical and electronic engineering, telecommunications, computer engineering and allied disciplines.
+\end{abstract}
+
+\renewcommand\IEEEkeywordsname{Keywords}
+\begin{IEEEkeywords}
+IEEE, Demo, \LaTeX, negative sampling.
+\end{IEEEkeywords}
+
+
+
+
+
+\IEEEpeerreviewmaketitle
+
+
+
+\section{Introduction}
+
+
+In the study of modeling the relationship between users and items, an important and special class of networks is bipartite network \cite{zhou2007bipartite,de2015bipartite,hu2007co,tang2012user}, where nodes can be divided into two disjoint sets, such that no two nodes within the same set are connected. Many systems can be naturally modeled as bipartite networks. For example, users are connected with the movie they have rated (e.g., ``MovieLens'' \cite{harper2015movielens}), web-users are connected with the webs they collected in a bookmark site (e.g., ``delicious'' \cite{wetzker2008analyzing}), and the consumers are connected with the goods they bought in the market \cite{brijs1999using}. The general case of bipartite network in in recommendation systems is illustrated in Fig. \ref{fig:user-item-bipartite}, where a user is connected with an item if he has bought it.
+
+\begin{figure}[!ht]
+   \centering
+   \begin{center}
+     \includegraphics*[width=0.8\linewidth]{user-item-bipartite}
+   \caption{Illustration of a user-item bipartite networks. Here users are connected with the corresponding selected items.}
+   \label{fig:user-item-bipartite}
+   \end{center}
+\end{figure}
+
+
+
+
+The remainder of this paper is organized as follows. We give a review of related work in Section \ref{sec:relatedwork}. In Section \ref{sec:methodology} we introduce the proposed latent user interests and item topics model LITM in detail. Section \ref{sec:experiment} describes our experimental setup, performance metrics, and discusses experimental results. Finally, the conclusions and future work are laid out in Section \ref{sec:conclusion}.
+
+
+
+
+
+\section{Related Work}\label{sec:relatedwork}
+The published content in these journals as well as the content from several hundred annual conferences sponsored by the IEEE are available in the IEEE online digital library, IEEE Xplore, for subscription-based access and individual publication purchases\cite{bell2007modeling,hofmann1999latent,shen2012learning}.
+
+\section{Methodology}\label{sec:methodology}
+
+\subsection{Notations}
+Suppose the any item has in total $K$ latent topics, then we define latent user interest vector and latent item interest vector by the following:
+   \begin{itemize}
+     \item{{\bf latent user interest vector} $\bm{u}_n$}: for each user $n$, we use $K$-dimensionality probability vector $\bm{u}_n$ to represent his interest distribution over the $K$ topics;
+     \item{{\bf latent item topic vector} $\bm{v}_m$}: for each item $m$, we use $K$-dimensionality probability vector $\bm{v}_m$ to represent its topic distribution over the $K$ topics.
+   \end{itemize}
+Here a probability vector is a vector with non-negative entries that add up to $1$, and that's why we can consider it as a distribution.
+
+
+Based on definition of $\bm{u}_n (n=1,2,\cdots N)$ and $\bm{v}_m (m=1,2,\cdots,M)$, the occurrence probability of the edge between user $n$ and item $m$, or the probability of user $n$ select item $m$, can be calculated by the following:
+\begin{equation}\label{equ:occurrenceP}
+  \bm{u}_n^T\bm{v}_m = \sum_{k=1}^{K}u_{n,k}v_{m,k},
+\end{equation}
+where $u_{n,k}$ and $v_{m,k}$ are respectively the $k-$th elements of the vector $\bm{u}_n$ and $\bm{v}_m$. We define it like this because if we let $u_{n,k}v_{m,k}$ be the occurrence probability of the edge between user $n$ and item $m$ on the $k-$th topic, then the sum of the occurrence probability over all topics (i.e. Eq. \ref{equ:occurrenceP}) can represent the occurrence probability of the edge between user $n$ and item $m$.
+
+
+\subsection{Basic Model}\label{sec:basemodel}
+ Suppose both $\bm{u}_n (n=1,2,\cdots N)$ and $\bm{v}_m (m=1,2,\cdots,M)$ are known, the {\color{red}{occurrence of edges}} between different user $n$ and item $m$ are independent according to the d-separation criterion \cite{bishop2006pattern} in probabilistic graphical models. So we can define the objective function as the {\color{red}{occurrence probability}} of the whole bipartite network $G$ as
+\begin{equation}
+  P(G|U,V)=\prod_{n=1}^N\prod_{m=1}^{M}\left({\bm{u}_n}^T{\bm{v}_m}\right)^{\sigma_{m,n}},
+\end{equation}
+ where $U = \{\bm{u}_n|n=1,2,\cdots,N\}$, $V=\{\bm{v}_m|m=1,2,\cdots,M\}$.
+
+
+Based on Alg. \ref{alg:litm}, we summarized the basic idea of solving the proposed model LITM (Eq. \ref{equ:occurrenceP}), which has been mentioned before in the current subsection. Line 3-4 means fixing $V$ and optimizing $U$, Line 5-6 means  fixing $U$ and optimizing $V$, and Line 2 means repeating the two operations until convergence. At last we will get a local minimum of the objective function.
+
+\begin{algorithm}
+    \caption{Basic idea for solving LITM}
+    \label{alg:litm}
+    \KwIn{$\sigma_{m,n}\in \{0,1\},n=1,2,\cdots,N,m=1,2,\cdots,M;K\in\mathbb{Z}^+;$}
+    \KwOut{$\bm{u}_n,\bm{v}_m,n=1,2,\cdots,N,m=1,2,\cdots,M;$}
+    Initialize $\bm{u}_n$ and $\bm{v}_m$\;
+    \While{not converged}
+    {
+      \For{$n=1;n \le N;n++$}
+      {
+        $\bm{u}_n =max_{\bm{u}_n}\sum_{m=1}^{M}{\sigma_{m,n}}\log\left({\bm{u}_n}^T{\bm{v}_m}\right)$ $//$ \textit{get  the solution by Reduced Gradient method}(see Alg.\ref{alg:litm})\;
+      }
+      \For{$m=1;m \le M;m++$}
+      {
+        $\bm{v}_m =max_{\bm{v}_m}\sum_{n=1}^{N}{\sigma_{m,n}}\log\left({\bm{u}_n}^T{\bm{v}_m}\right)$ $//$ \textit{get the solution by Reduced Gradient method}(see Alg.\ref{alg:litm})\;
+      }
+    }
+    return $\bm{u}_n,\bm{v}_m,n=1,2,\cdots,N,m=1,2,\cdots,M$\;
+\end{algorithm}
+
+
+
+\section{Experimental Evaluation} \label{sec:experiment}
+
+To evaluate our model, we conducted preliminary experiments. We performed the experiments using a server with a 16-core 2.6 GHz Intel Xeon processor with 32GB RAM, running Red Hat Linux 4.1.2-33.
+
+\subsection{Experimental DataSet}
+The Institute of Electrical and Electronics Engineers (IEEE, pronounced "I triple E") is a professional association with its corporate office in New York City and its operations center in Piscataway, New Jersey. It was formed in 1963 from the amalgamation of the American Institute of Electrical Engineers and the Institute of Radio Engineers. Today, it is the world's largest association of technical professionals with more than 400,000 members in chapters around the world. Its objectives are the educational and technical advancement of electrical and electronic engineering, telecommunications, computer engineering and allied disciplines.
+
+\section{Conclusion}\label{sec:conclusion}
+This paper presents LITM, a .....
+
+For the future work, we will .......
+
+
+\section*{Acknowledgment}
+
+
+The authors would like to thank...
+
+
+
+
+
+
+
+\bibliographystyle{ieeetr}
+\bibliography{reference}
+
+
+
+
+% that's all folks
+\end{document}
+
+
